@@ -1,8 +1,9 @@
 import useMqttClient from "./mqtt/mqttClient.js"
 import { getSetting } from "./api/serverApi.js"
 import { executeAgent } from "./agent.js"
+import { generateId } from "./helpers/generateId.js"
 
-// Get arguments string serverMqttUrl serverApiUrl
+// Get arguments string serverMqttUrl serverApiUrl [name]
 if(process.argv.length < 4){
     console.log('Missing arguments')
     process.exit(1)
@@ -11,8 +12,9 @@ if(process.argv.length < 4){
 // Parse arguments
 var serverMqttUrl = process.argv[2]
 var serverApiUrl = process.argv[3]
+var name = process.argv.length > 4 ? process.argv[4] : generateId()
 
-console.log(`[agent] Starting agent with urls: ${serverMqttUrl} and ${serverApiUrl}`)
+console.log(`[agent] Starting agent (${name}) with urls: ${serverMqttUrl} and ${serverApiUrl}`)
 
 async function main(){
     // Use settings endpoint to check if there is a connection with the server
