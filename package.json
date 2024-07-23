@@ -1,18 +1,36 @@
 {
   "name": "gpd-agent",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "Agent for the GPD project",
+  "author": "Sidney Dijkstra",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sidneydijkstra/gpd-agent.git"
+  },
+  "keywords": [
+    "gpt",
+    "agent"
+  ],
   "main": "index.js",
   "type": "module",
   "scripts": {
     "dev": "node index.js",
+    "build": "rimraf dist && rollup -c",
+    "publish:lib": "npm run build && npm publish",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "mqtt": "^5.8.0",
     "node-fetch": "^3.3.2",
     "yaml": "^2.4.5"
+  },
+  "devDependencies": {
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-commonjs": "^26.0.1",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "rimraf": "^6.0.1",
+    "rollup": "^4.19.0"
   }
 }
