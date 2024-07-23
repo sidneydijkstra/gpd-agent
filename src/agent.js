@@ -1,10 +1,10 @@
-import { FileLogger } from './helpers/logger.mjs';
-import { parseConfigString } from './helpers/configParser.mjs';
-import { getTransaction, getTransactionTasks } from './api/serverApi.mjs';
-import { jobs as storedJobs } from './jobs/index.mjs';
+import { FileLogger } from './helpers/logger.js';
+import { parseConfigString } from './helpers/configParser.js';
+import { getTransaction, getTransactionTasks } from './api/serverApi.js';
+import { jobs as storedJobs } from './jobs/index.js';
 
-import pipelineStatus from './enums/pipelineStatus.mjs';
-import pipelineTaskStatus from './enums/pipelineTaskStatus.mjs';
+import pipelineStatus from './enums/pipelineStatus.js';
+import pipelineTaskStatus from './enums/pipelineTaskStatus.js';
 
 export async function executeAgent(baseApiUrl, mqttClient, agentGuid, workFolderPath, pipelineGuid, transactionGuid){
     // Create file logger

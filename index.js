@@ -1,6 +1,6 @@
-import useMqttClient from "./src/mqtt/mqttClient.mjs"
-import { getSetting } from "./src/api/serverApi.mjs"
-import { executeAgent } from "./src/agent.mjs"
+import useMqttClient from "./src/mqtt/mqttClient.js"
+import { getSetting } from "./src/api/serverApi.js"
+import { executeAgent } from "./src/agent.js"
 
 // Get arguments string serverMqttUrl serverApiUrl
 if(process.argv.length < 4){

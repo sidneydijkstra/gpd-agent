@@ -1,4 +1,4 @@
-import { useGenerateApi } from "./useGenerateApi.mjs";
+import { useGenerateApi } from "./useGenerateApi.js";
 
 export function getSetting(baseApiUrl, key){
     const client = useGenerateApi(baseApiUrl, {
