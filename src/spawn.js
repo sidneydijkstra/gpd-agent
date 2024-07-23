@@ -3,12 +3,12 @@ import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
-export default function spawn(baseMqttUrl, baseApiUrl, enableLogging = false){
+export default function spawn(baseMqttUrl, baseApiUrl, name = '', enableLogging = false){
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = dirname(__filename);
     const scriptPath = join(__dirname, 'runner.js');
     console.log(scriptPath)
-    var command = `node ${scriptPath} ${baseMqttUrl} ${baseApiUrl}`
+    var command = `node ${scriptPath} ${baseMqttUrl} ${baseApiUrl} ${name}`
 
     const child = childSpawn(command, [], { shell: true, cwd: process.cwd()})
 
