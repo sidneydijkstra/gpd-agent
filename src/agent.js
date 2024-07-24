@@ -8,8 +8,9 @@ import pipelineTaskStatus from './enums/pipelineTaskStatus.js';
 
 export async function executeAgent(baseApiUrl, mqttClient, agentGuid, workFolderPath, pipelineGuid, transactionGuid){
     // Create file logger
-    var logger = new FileLogger(`${workFolderPath}/log.txt`)
+    var logger = new FileLogger(`${workFolderPath}/agent.log`)
     // Log the start of the job
+    logger.log(`------------------\nHello from agent ${agentGuid}\n------------------\n`)
     logger.log(`Running pipeline ${pipelineGuid}`)
 
     // Get the transaction

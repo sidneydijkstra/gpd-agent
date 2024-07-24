@@ -1,9 +1,10 @@
 import fs from 'fs';
 
 export class FileLogger {
-  constructor(filePath) {
+  constructor(filePath, forwardConsole = false) {
     this.filePath = filePath;
     this.recording = '';
+    this.forwardConsole = forwardConsole;
     this.callback = () => {};
   }
 
@@ -18,6 +19,10 @@ export class FileLogger {
       this.recording += message;
       this.callback(message);
       fs.appendFileSync(this.filePath, `${timestamp}: ` + logMessages.join('') + '\n');
+
+      if (this.forwardConsole) {
+        console.log(...messages);
+      }
     } catch (error) {
       console.log('[FileLogger] Error writing to log file:', error);
     }
