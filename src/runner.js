@@ -42,7 +42,9 @@ async function main(){
                     logger.log(`[agent] Finished execution ${data.transactionGuid}`)
                 })
         }else if(topic == "agent/quit"){
-            if(data != name)
+            var data = JSON.parse(message.toString())
+            
+            if(data.agentGuid != name)
                 return
 
             logger.log("[agent] Quitting agent")
