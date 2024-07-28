@@ -51,9 +51,9 @@ async function main(){
                     logger.log(`[agent] Error preparing execution: ${error}`)
                 })
         }else if(topic == "agent/quit"){
-            var data = JSON.parse(message.toString())
+            var data = message.toString()
             
-            if(data.agentGuid != name)
+            if(data != name)
                 return
 
             logger.log("[agent] Quitting agent")
