@@ -1,16 +1,64 @@
+import fs from 'fs';
 import { FileLogger } from './helpers/logger.js';
+import { unzipFolder } from './helpers/zipHelper.js';
 import { parseConfigString } from './helpers/configParser.js';
-import { getTransaction, getTransactionTasks } from './api/serverApi.js';
+import { getTransaction, getTransactionTasks, getWork } from './api/serverApi.js';
 import { jobs as storedJobs } from './jobs/index.js';
 
 import pipelineStatus from './enums/pipelineStatus.js';
 import pipelineTaskStatus from './enums/pipelineTaskStatus.js';
 
+function createFolder(path){
+    if(!fs.existsSync(path)) {
+        fs.mkdirSync(path);
+    }
+}
+
+export function prepareAgent(baseApiUrl, agentGuid, workFolderPath, pipelineGuid, transactionGuid){
+    return new Promise((resolve, reject) => {
+        // Create the default work folder
+        createFolder(workFolderPath)
+
+        // Create the current work folder
+        var workPath = `${workFolderPath}/${transactionGuid}`
+        createFolder(workPath)
+        createFolder(`${workPath}/project`)
+        createFolder(`${workPath}/storage`)
+        createFolder(`${workPath}/artifacts`)
+        
+        // Create file logger
+        var logger = new FileLogger(`${workPath}/agent.log`)
+        // Log the start of the job
+        logger.log(`------------------\nHello from agent ${agentGuid}\n------------------\n`)
+        logger.log(`Preparing pipeline ${pipelineGuid}`)
+
+        // Get the work
+        var projectPath = `${workPath}/project.zip`
+        getWork(baseApiUrl, pipelineGuid, transactionGuid, projectPath)
+            .then(() => {
+                logger.log('Downloaded work')
+                // Unzip the work
+                unzipFolder(projectPath, `${workPath}/project`)
+                    .then(() => {
+                        logger.log('Unzipped work')
+                        resolve(workPath)
+                    })
+                    .catch((error) => {
+                        logger.log(`Error unzipping work: ${error}`)
+                        reject()
+                    })
+            })
+            .catch((error) => {
+                logger.log(`Error getting work: ${error}`)
+                reject()
+            })
+        })
+}
+
 export async function executeAgent(baseApiUrl, mqttClient, agentGuid, workFolderPath, pipelineGuid, transactionGuid){
     // Create file logger
     var logger = new FileLogger(`${workFolderPath}/agent.log`)
     // Log the start of the job
-    logger.log(`------------------\nHello from agent ${agentGuid}\n------------------\n`)
     logger.log(`Running pipeline ${pipelineGuid}`)
 
     // Get the transaction
@@ -65,7 +113,7 @@ export async function executeAgent(baseApiUrl, mqttClient, agentGuid, workFolder
             // Delay for debugging
             await new Promise(r => setTimeout(r, 1000));
             // Create task logger
-            var taskLogger = new FileLogger(`${workFolderPath}/log.txt`)
+            var taskLogger = new FileLogger(`${workFolderPath}/agent.log`)
             // Start to record the logger
             taskLogger.record()
             // Log task output

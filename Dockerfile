@@ -11,5 +11,5 @@ RUN npm install
 CMD ["node", "./src/runner.js", "ws://192.168.1.2:8888", "http://192.168.1.2:3000/api"]
 
 # Start agent
-# docker run -it -d --mount src=C:\projects\git_cicd\gpd\server\.wogpd\.,target=/workdir,type=bind gpd-agent
-# node .\src\runner.js ws://192.168.1.2:8888 http://192.168.1.2:3000/api
+# docker run -it -d gpd-agent
+# node .\src\runner.js ws://192.168.1.2:8888 http://192.168.1.2:3000/api test C:\projects\git_cicd\gpd-agent\.work

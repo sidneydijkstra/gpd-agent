@@ -10,7 +10,7 @@ export function useGenerateApi(baseUrl, defaults = {}) {
     return new Proxy(callable, {
         get({ url }, propKey) {
             const method = propKey.toUpperCase();
-            if (["GET", "POST", "PUT", "DELETE", "PATCH"].includes(method)) {
+            if (["GET", "POST", "PUT", "DELETE", "PATCH", "FILE"].includes(method)) {
                 return (data, overrides = {}) => {
                     const payload = { method, ...defaults, ...overrides };
                     switch (method) {
@@ -23,6 +23,22 @@ export function useGenerateApi(baseUrl, defaults = {}) {
                         case "PATCH": {
                             payload.body = JSON.stringify(data);
                         }
+                    }
+
+                    // If the method is FILE, change the method to GET and return the body
+                    if(method === "FILE") {
+                        payload.method = "GET";
+                        return fetch(url, payload)
+                            .then(async response => {
+                                // If the response is not OK, reject the promise with the status text
+                                if (!response.ok) {
+                                    var error = await response.text()
+                                    return Promise.reject(error)
+                                }
+                                
+                                // If the response is OK, return the body
+                                return Promise.resolve(response.body)
+                            })
                     }
                     
                     return fetch(url, payload)

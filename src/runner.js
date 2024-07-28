@@ -1,11 +1,11 @@
 import useMqttClient from "./mqtt/mqttClient.js"
 import { onExit } from "./helpers/processHelper.js"
-import { executeAgent } from "./agent.js"
+import { prepareAgent, executeAgent } from "./agent.js"
 import { generateId } from "./helpers/generateId.js"
 import { FileLogger } from "./helpers/logger.js"
 
 
-// Get arguments string serverMqttUrl serverApiUrl [name]
+// Get arguments string serverMqttUrl serverApiUrl [name] [workDir]
 if(process.argv.length < 4){
     console.log('Missing arguments')
     process.exit(1)
@@ -15,6 +15,7 @@ if(process.argv.length < 4){
 var serverMqttUrl = process.argv[2]
 var serverApiUrl = process.argv[3]
 var name = process.argv.length > 4 ? process.argv[4] : generateId()
+var workDir = process.argv.length > 5 ? process.argv[5] : '/workdir'
 
 var logger = new FileLogger(`${name}.runner.log`, true)
 
@@ -37,9 +38,17 @@ async function main(){
                 return
 
             logger.log(`[agent] Executing: `, data)
-            executeAgent(serverApiUrl, mqttClient, data.agentGuid, data.workFolderPath, data.pipelineGuid, data.transactionGuid)
-                .finally(() => {
-                    logger.log(`[agent] Finished execution ${data.transactionGuid}`)
+
+            prepareAgent(serverApiUrl, name, workDir, data.pipelineGuid, data.transactionGuid)
+                .then((workPath) => {
+                    logger.log(`[agent] Prepared execution ${data.transactionGuid}`)
+                    executeAgent(serverApiUrl, mqttClient, data.agentGuid, workPath, data.pipelineGuid, data.transactionGuid)
+                        .finally(() => {
+                            logger.log(`[agent] Finished execution ${data.transactionGuid}`)
+                        })
+                })
+                .catch((error) => {
+                    logger.log(`[agent] Error preparing execution: ${error}`)
                 })
         }else if(topic == "agent/quit"){
             var data = JSON.parse(message.toString())
