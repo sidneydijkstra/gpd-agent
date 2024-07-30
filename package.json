@@ -1,6 +1,6 @@
 {
   "name": "gpd-agent",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Agent for the GPD project",
   "author": "Sidney Dijkstra",
   "license": "MIT",
