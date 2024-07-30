@@ -25,6 +25,7 @@ process.on("SIGINT", async (signal) => {
 // what about errors
 // try remove/comment this handler, 'exit' event still works
 process.on("uncaughtException", async (err) => {
+    console.log("Uncaught exception", err);
     for (const callback of callbacks){
         await callback()
     }

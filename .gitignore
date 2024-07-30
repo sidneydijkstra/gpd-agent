@@ -1,6 +1,8 @@
 # Project related
 .env
 .work
+agent.name
+agent.id
 
 # Logs
 logs

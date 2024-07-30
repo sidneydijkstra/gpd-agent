@@ -1,21 +1,27 @@
+import 'dotenv/config'
+import args from "args"
+import { v4 } from 'uuid'
 import useMqttClient from "./mqtt/mqttClient.js"
 import { onExit } from "./helpers/processHelper.js"
 import { prepareAgent, executeAgent } from "./agent.js"
-import { generateId } from "./helpers/generateId.js"
+import { loadName, loadGuid } from "./helpers/localStorageHelper.js"
 import { FileLogger } from "./helpers/logger.js"
 
+const version = '1.0.13'
 
-// Get arguments string serverMqttUrl serverApiUrl [name] [workDir]
-if(process.argv.length < 4){
-    console.log('Missing arguments')
-    process.exit(1)
-}
+args
+    .option('mqtt', 'The url of the mqtt server')
+    .option('api', 'The url of the api server')
+    .option('name', 'The name of the agent', null)
+    .option('dir', 'The working directory of the agent', '/workdir')
+
+const flags = args.parse(process.argv)
 
 // Parse arguments
-var serverMqttUrl = process.argv[2]
-var serverApiUrl = process.argv[3]
-var name = process.argv.length > 4 ? process.argv[4] : generateId()
-var workDir = process.argv.length > 5 ? process.argv[5] : '/workdir'
+var serverMqttUrl = process.env.AGENT_MQTT_URL ?? flags.mqtt
+var serverApiUrl = process.env.AGENT_API_URL ?? flags.api
+var name = process.env.AGENT_NAME != null ? loadName(process.env.AGENT_NAME) : flags.name ?? loadName()
+var workDir = flags.dir
 
 var logger = new FileLogger(`${name}.runner.log`, true)
 
@@ -70,7 +76,13 @@ async function main(){
         mqttClient.subscribe('agent/quit', (err) => {})
         mqttClient.on("message", onMessageCallback)
 
-        mqttClient.publish('agent/register', name)
+        // If agent is local agent use 'local' as id, otherwise generate a new uuid id
+        const guid = name == 'local' ? 'local' : loadGuid(v4())
+        mqttClient.publish('agent/register', JSON.stringify({
+            guid: guid,
+            name: name,
+            version: version
+        }))
 
         logger.log("[agent] Agent is running")
     }, () => {
