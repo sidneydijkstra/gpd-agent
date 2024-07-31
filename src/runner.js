@@ -7,15 +7,16 @@ import { prepareAgent, executeAgent } from "./agent.js"
 import { loadName, loadGuid } from "./helpers/localStorageHelper.js"
 import { FileLogger } from "./helpers/logger.js"
 
-const version = '1.0.15'
+const version = '1.0.16'
 
 args
     .option('mqtt', 'The url of the mqtt server')
     .option('api', 'The url of the api server')
-    .option('name', 'The name of the agent', null)
+    .option('name', 'The name of the agent')
     .option('dir', 'The working directory of the agent', '/workdir')
 
 const flags = args.parse(process.argv)
+console.log(flags)
 
 // Parse arguments
 var serverMqttUrl = process.env.AGENT_MQTT_URL ?? flags.mqtt

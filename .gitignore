@@ -2,7 +2,7 @@
 .env
 .work
 agent.name
-agent.id
+agent.guid
 
 # Logs
 logs
