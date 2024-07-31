@@ -7,7 +7,7 @@ import { prepareAgent, executeAgent } from "./agent.js"
 import { loadName, loadGuid } from "./helpers/localStorageHelper.js"
 import { FileLogger } from "./helpers/logger.js"
 
-const version = '1.0.16'
+const version = '1.0.17'
 
 args
     .option('mqtt', 'The url of the mqtt server')
