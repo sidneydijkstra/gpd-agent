@@ -28,16 +28,21 @@ var logger = new FileLogger(`${name}.runner.log`, true)
 
 logger.log(`[agent] Starting agent (${name}) with urls: ${serverMqttUrl} and ${serverApiUrl}`)
 
+
 async function main(){
-    onExit(async () => {
+    async function exitProgram(){
         logger.log("[agent] Quitting agent")
         mqttClient.publish('agent/unregister', name)
         // wait 2 seconds for the mqtt message to be sent
         await new Promise(resolve => setTimeout(resolve, 2000))
+    }
+
+    onExit(async () => {
+        await exitProgram()
     })
 
     // Create the callback for the mqtt client
-    const onMessageCallback = (topic, message) => {
+    const onMessageCallback = async (topic, message) => {
         if(topic == "agent/exec"){
             var data = JSON.parse(message.toString())
 
@@ -63,7 +68,7 @@ async function main(){
             if(data != name)
                 return
 
-            logger.log("[agent] Quitting agent")
+            await exitProgram()
             process.exit(0)
         }
     }
