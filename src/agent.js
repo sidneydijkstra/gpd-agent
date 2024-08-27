@@ -1,8 +1,8 @@
 import fs from 'fs';
 import { FileLogger } from './helpers/logger.js';
 import { unzipFolder } from './helpers/zipHelper.js';
-import { parseConfigString } from './helpers/configParser.js';
-import { getTransaction, getTransactionTasks, getWork } from './api/serverApi.js';
+import { parseConfigString, processConfig } from './helpers/configParser.js';
+import { getTransaction, getTransactionTasks, getWork, getStorage } from './api/serverApi.js';
 import { jobs as storedJobs } from './jobs/index.js';
 
 import pipelineStatus from './enums/pipelineStatus.js';
@@ -34,7 +34,7 @@ export function prepareAgent(baseApiUrl, agentGuid, workFolderPath, pipelineGuid
 
         // Get the work
         var projectPath = `${workPath}/project.zip`
-        getWork(baseApiUrl, pipelineGuid, transactionGuid, projectPath)
+        getWork(baseApiUrl, transactionGuid, projectPath)
             .then(() => {
                 logger.log('Downloaded work')
                 // Unzip the work
@@ -90,6 +90,48 @@ export async function executeAgent(baseApiUrl, mqttClient, agentGuid, workFolder
     // Get the config
     var jobConfig = transaction.config.replace(/\\n/g, '\n').replace(/\\"/g, '\"').slice(1,-1)
     var parsedConfig = parseConfigString(jobConfig)
+
+    var storage = parsedConfig.storage ?? null
+    
+    if(storage){
+        logger.log(`Loading storage`)
+        const store = {}
+        // Get the storage
+        for (var storageItem of storage){
+            // Check if storage item has name when using guid
+            if(storageItem.guid && storageItem.name)
+                continue
+
+            // Get the storage item
+            await getStorage(baseApiUrl, transactionGuid, storageItem)
+                .then((response) => {
+                    logger.log(`Received storage ${JSON.stringify(response)}`)
+
+                    // Prepare the storage item inside the store
+                    const name = storageItem.alias ? storageItem.alias : storageItem.name
+                    store[name] = response.type == 'Json' ? JSON.parse(response.content) : response.content
+                })
+                .catch((error) => {
+                    logger.log(`Error getting storage ${storageItem}: ${error}`)
+                })
+        }
+
+        logger.log('Preparing configuration')
+
+        // Replace all variables in the config
+        parsedConfig = processConfig(parsedConfig, /\${(.*?)}/g, (content) => {
+            try {
+                var vars = content.split('.')
+                var replacement = vars.length == 1 ? store[vars[0]] || content : store[vars[0]][vars[1]] || content
+                return replacement
+            } catch (e) {
+                return content
+            }
+        })
+
+        logger.log(parsedConfig, JSON.stringify(parsedConfig))
+    }
+
     var jobs = parsedConfig.jobs
     
     // Loop over all jobs

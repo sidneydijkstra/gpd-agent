@@ -31,13 +31,13 @@ export function getTransactionTasks(baseApiUrl, pipelineGuid, transactionGuid){
     return client.pipeline[`${pipelineGuid}`].transaction[`${transactionGuid}`].task.get();
 }
 
-export function getWork(baseApiUrl, pipelineGuid, transactionGuid, filePath){
+export function getWork(baseApiUrl, transactionGuid, filePath){
     const client = useGenerateApi(baseApiUrl, {
         headers: {},
     });
 
     return new Promise((resolve, reject) => {
-        client.worker[`${pipelineGuid}`][`${transactionGuid}`].work.file()
+        client.worker[`${transactionGuid}`].work.file()
             .then(response => {
                 const fileStream = fs.createWriteStream(filePath);
                 response.pipe(fileStream);
@@ -53,4 +53,20 @@ export function getWork(baseApiUrl, pipelineGuid, transactionGuid, filePath){
                 reject(err)
             })
     })
+}
+
+export function getStorage(baseApiUrl, transactionGuid, { name, guid }){
+    const client = useGenerateApi(baseApiUrl, {
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    if(name){
+        return client.worker[`${transactionGuid}`].storage.get({ name });
+    }else if(guid){
+        return client.worker[`${transactionGuid}`].storage.get({ guid });
+    }else{
+        return Promise.reject("No name or guid provided");
+    }
 }

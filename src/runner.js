@@ -7,7 +7,7 @@ import { prepareAgent, executeAgent } from "./agent.js"
 import { loadName, loadGuid } from "./helpers/localStorageHelper.js"
 import { FileLogger } from "./helpers/logger.js"
 
-const version = '1.0.17'
+const version = '1.0.18'
 
 args
     .option('mqtt', 'The url of the mqtt server')
@@ -16,7 +16,6 @@ args
     .option('dir', 'The working directory of the agent', '/workdir')
 
 const flags = args.parse(process.argv)
-console.log(flags)
 
 // Parse arguments
 var serverMqttUrl = process.env.AGENT_MQTT_URL ?? flags.mqtt
