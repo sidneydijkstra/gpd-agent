@@ -2,6 +2,7 @@
     from: https://gist.github.com/DavidWells/93535d7d6bec3a7219778ebcfa437df3 
 */
 
+import fs from "fs";
 import fetch from "node-fetch";
 
 export function useGenerateApi(baseUrl, defaults = {}) {
@@ -10,7 +11,7 @@ export function useGenerateApi(baseUrl, defaults = {}) {
     return new Proxy(callable, {
         get({ url }, propKey) {
             const method = propKey.toUpperCase();
-            if (["GET", "POST", "PUT", "DELETE", "PATCH", "FILE"].includes(method)) {
+            if (["GET", "POST", "PUT", "DELETE", "PATCH", "FILE", "PFILE"].includes(method)) {
                 return (data, overrides = {}) => {
                     const payload = { method, ...defaults, ...overrides };
                     switch (method) {
@@ -22,6 +23,17 @@ export function useGenerateApi(baseUrl, defaults = {}) {
                         case "PUT":
                         case "PATCH": {
                             payload.body = JSON.stringify(data);
+                        }
+                        case "PFILE": {
+                            const filePath = data;
+                            const fileStream = fs.createReadStream(filePath);
+                            payload.method = "POST";
+                            payload.body = fileStream;
+                            payload.headers = {
+                                ...payload.headers,
+                                "Content-Type": "application/zip",
+                            };
+                            break;
                         }
                     }
 

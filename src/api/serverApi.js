@@ -55,6 +55,16 @@ export function getWork(baseApiUrl, transactionGuid, filePath){
     })
 }
 
+export function uploadArtifacts(baseApiUrl, transactionGuid, filePath){
+    const client = useGenerateApi(baseApiUrl, {
+        headers: {
+            "Content-Type": "application/zip",
+        },
+    });
+
+    return client.worker[`${transactionGuid}`].artifacts.pfile(filePath);
+}
+
 export function getStorage(baseApiUrl, transactionGuid, { name, guid }){
     const client = useGenerateApi(baseApiUrl, {
         headers: {

@@ -1,17 +1,23 @@
 import fs from 'fs';
 import { FileLogger } from './helpers/logger.js';
-import { unzipFolder } from './helpers/zipHelper.js';
+import { unzipFolder, zipFolder } from './helpers/zipHelper.js';
 import { parseConfigString, processConfig } from './helpers/configParser.js';
-import { getTransaction, getTransactionTasks, getWork, getStorage } from './api/serverApi.js';
+import { getTransaction, getTransactionTasks, getWork, uploadArtifacts, getStorage } from './api/serverApi.js';
 import { jobs as storedJobs } from './jobs/index.js';
 
 import pipelineStatus from './enums/pipelineStatus.js';
 import pipelineTaskStatus from './enums/pipelineTaskStatus.js';
 
 function createFolder(path){
+    // Create folder if it does not exist
     if(!fs.existsSync(path)) {
         fs.mkdirSync(path);
     }
+}
+
+function hasContent(path){
+    // Check if folder contains files or folders
+    return fs.existsSync(path) ? fs.readdirSync(path).length > 0 : false
 }
 
 export function prepareAgent(baseApiUrl, agentGuid, workFolderPath, pipelineGuid, transactionGuid){
@@ -206,6 +212,26 @@ export async function executeAgent(baseApiUrl, mqttClient, agentGuid, workFolder
     }
 
     logger.log(`All jobs completed`)
+
+    // Check if any artifacts
+    if(hasContent(`${workFolderPath}/artifacts`)){
+        logger.log(`Uploading artifacts`)
+        // Upload the artifacts
+        zipFolder(`${workFolderPath}/artifacts`, `${workFolderPath}/artifacts.zip`)
+            .then(() => {
+                logger.log('Zipped artifacts')
+                uploadArtifacts(baseApiUrl, transactionGuid, `${workFolderPath}/artifacts.zip`)
+                    .then(() => {
+                        logger.log('Uploaded artifacts')
+                    })
+                    .catch((error) => {
+                        logger.log(`Error uploading artifacts: ${error}`)
+                    })
+            })
+            .catch((error) => {
+                logger.log(`Error zipping artifacts: ${error}`)
+            })
+    }
     
     // Update the transaction status
     transaction.status = pipelineStatus.completed
