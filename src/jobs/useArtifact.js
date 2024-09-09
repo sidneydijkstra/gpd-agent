@@ -28,6 +28,11 @@ export async function useArtifact(config, folderPath, logger){
     }else if (config.hasOwnProperty('file')){
         var file = config.file
         
+        // Remove '.' from file if './' provided
+        file = !file.startsWith('./') ? file : file.slice(1)
+        // Add '/' to file string if not provided
+        file = file.startsWith('/') ? file : `/${file}`
+        
         if(config.hasOwnProperty('targetName')){
             var targetName = config.targetName
 

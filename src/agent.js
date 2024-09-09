@@ -217,10 +217,10 @@ export async function executeAgent(baseApiUrl, mqttClient, agentGuid, workFolder
     if(hasContent(`${workFolderPath}/artifacts`)){
         logger.log(`Uploading artifacts`)
         // Upload the artifacts
-        zipFolder(`${workFolderPath}/artifacts`, `${workFolderPath}/artifacts.zip`)
-            .then(() => {
+        await zipFolder(`${workFolderPath}/artifacts`, `${workFolderPath}/artifacts.zip`)
+            .then(async () => {
                 logger.log('Zipped artifacts')
-                uploadArtifacts(baseApiUrl, transactionGuid, `${workFolderPath}/artifacts.zip`)
+                await uploadArtifacts(baseApiUrl, transactionGuid, `${workFolderPath}/artifacts.zip`)
                     .then(() => {
                         logger.log('Uploaded artifacts')
                     })
