@@ -26,7 +26,7 @@ docker build -t gpd-agent .
 
 Once the image is built, run the Docker container with the following command:
 ```bash
-docker run -it -d -e AGENT_MQTT_URL=ws://localhost:8888 -e AGENT_API_URL=http://localhost:3000/api agent-name
+docker run -it -d -e AGENT_MQTT_URL=ws://localhost:8888 -e AGENT_API_URL=http://localhost:3000/api gpd-agent
 ```
 
 ## Logging
